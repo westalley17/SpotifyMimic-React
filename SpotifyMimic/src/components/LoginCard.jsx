@@ -8,15 +8,14 @@ import SweetAlert2 from 'react-sweetalert2'
 
 // login definition start
 export default function LoginCard(props) {
+    const [swalProps, setSwalProps] = useState({})
     // these useState pieces act as local variables that can potentially be passed to child/sibling components (format is [getter, setter])
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [swalProps, setSwalProps] = useState({})
 
     // this login function is what verifies our user's credentials before being passed to the backend for authentication. Will use RegEx matching in the future.
     const login = async (e) => {
         e.preventDefault()
-
         try {
             let strHTML = ''
             if (email.length < 1) { // don't let email be blank
@@ -39,7 +38,7 @@ export default function LoginCard(props) {
             }
             else {
                 try {
-                    // use Axios here to call a POST to the sessions endpoint, generating a new session as long as the account is legitimate.
+                    // use Axios here to call a POST to the sessions endpoint, creating a new session as long as the account is legitimate.
                     const response = await axios.post('http://localhost:3000/api/sessions', { email, password })
                     setSwalProps({
                         show: true,
@@ -50,6 +49,9 @@ export default function LoginCard(props) {
                             setSwalProps({})
                         }
                     })
+                    // zeroes out the fields so that it looks nicer when we go to sign in again.
+                    setEmail('') 
+                    setPassword('')
                     // sets session storage, removing the need to sign in again for the next 24 hours (once I actually code that part in)
                     sessionStorage.setItem('SessionID', response.data.SessionID)
                     props.loginToggle() // this hides the current card, WILL MAKE THE TRANSITION SMOOTHER IN THE FUTURE
@@ -84,9 +86,9 @@ export default function LoginCard(props) {
                 <form>
                     <div className="form-group mt-2">
                         <label htmlFor="txtLoginEmail" className="form-label text-white"> Email or username </label>
-                        <input placeholder="Email or username" type="email" className="input mb-2" value={email} onChange={(e) => { setEmail(e.target.value) }} />
+                        <input id="txtLoginEmail" placeholder="Email or username" type="email" className="input mb-2" value={email} onChange={(e) => { setEmail(e.target.value) }} />
                         <label htmlFor="txtLoginPassword" className="form-label text-white"> Password </label>
-                        <input placeholder="Password" type="password" className="input mb-3" value={password} onChange={(e) => { setPassword(e.target.value) }} />
+                        <input id="txtLoginPassword" placeholder="Password" type="password" className="input mb-3" value={password} onChange={(e) => { setPassword(e.target.value) }} />
                     </div>
                     <button className="btn col-12 btn-submit text-black" type="button" onClick={login}><strong>Log in</strong></button>
                     <hr />
