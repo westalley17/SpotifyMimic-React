@@ -13,8 +13,41 @@ export default function LoginCard(props) {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
+    /* This block of code below allows for automatic sign-on with the use of session storage.
+        If the user has a session id in their storage, we will log them in automatically. */
+    const SessionID = sessionStorage.getItem('SessionID')
+    // verify that there's a sessionID stored.
+    const [load, setLoad] = useState(false) // this will make sure this request is only handled ONCE (on our first load of the page)
+
+    if (SessionID && !load) {
+        setLoad(true)
+        // use Axios here to retrieve the user details in the event that the session is still active.
+        axios.get(`http://localhost:3000/api/sessions?SessionID=${SessionID}`).then((session) => {
+            console.log(session)
+            // if response returns an active session, then load that user's dashboard
+            if (session.status == '200') {
+                props.loginToggle()
+                props.dashboardToggle()
+            }
+            // else the user's session has expired and they need to continue with the normal log in process.
+            else {
+                setSwalProps({
+                    show: true,
+                    icon: 'error',
+                    title: 'Error',
+                    text: session.response.data.error,
+                    onConfirm: () => {
+                        // Reset swalProps
+                        setSwalProps({})
+                    }
+                })
+            }
+        })
+
+    }
+
     // this login function is what verifies our user's credentials before being passed to the backend for authentication. Will use RegEx matching in the future.
-    const login = async (e) => {
+    const login = (e) => {
         e.preventDefault()
         try {
             let strHTML = ''
@@ -39,23 +72,27 @@ export default function LoginCard(props) {
             else {
                 try {
                     // use Axios here to call a POST to the sessions endpoint, creating a new session as long as the account is legitimate.
-                    const response = await axios.post('http://localhost:3000/api/sessions', { email, password })
-                    setSwalProps({
-                        show: true,
-                        icon: 'success',
-                        title: 'Successfully logged in!',
-                        onConfirm: () => {
-                            // Reset swalProps
-                            setSwalProps({})
-                        }
+                    axios.post('http://localhost:3000/api/sessions', { email, password }).then((response) => {
+                        setSwalProps({
+                            show: true,
+                            icon: 'success',
+                            title: 'Successfully logged in!',
+                            onConfirm: () => {
+                                // Reset swalProps
+                                setSwalProps({})
+                            }
+                        })
+                        // zeroes out the fields so that it looks nicer when we go to sign in again.
+                        setEmail('')
+                        setPassword('')
+                        // sets session storage, removing the need to sign in again for the next 24 hours (once I actually code that part in)
+                        sessionStorage.setItem('SessionID', response.data.SessionID)
+                        
+                        // Alright, so these toggles don't work... for some reason. It's only when logging in with this axios.post callback format. 
+                        // Note: The axios.get callback on line 25 does the same thing with some other stuff and those toggles work perfectly. 
+                        props.loginToggle()
+                        props.dashboardToggle()
                     })
-                    // zeroes out the fields so that it looks nicer when we go to sign in again.
-                    setEmail('') 
-                    setPassword('')
-                    // sets session storage, removing the need to sign in again for the next 24 hours (once I actually code that part in)
-                    sessionStorage.setItem('SessionID', response.data.SessionID)
-                    props.loginToggle() // this hides the current card, WILL MAKE THE TRANSITION SMOOTHER IN THE FUTURE
-                    props.dashboardToggle() // this line calls our prop that shows the dashboard after a successful login
                 }
                 catch (error) {
                     // basic error catch-all, will handle certain responses differently later on

@@ -63,7 +63,7 @@ export default function RegisterCard(props) {
                     setFirstName('')
                     setLastName('')
                     /////////////
-                    props.regToggle() // this hides the register card, WILL MAKE THE TRANSITION SMOOTHER IN THE FUTURE
+                    props.regToggle() // this hides the register card
                     props.loginToggle() // this shows the login card so that the user can then sign in with that account and continue through the application.
                 } catch (error) {
                     // basic error catch-all, will handle certain responses differently later on

@@ -15,21 +15,15 @@ import Dashboard from './components/Dashboard.jsx'
 export default function App() {
   // these useState pieces act as local variables that can be passed to child/sibling components (format is [getter, setter])
   const [loginVisible, toggleLoginVisible] = useState(true)
-  const [registerVisible, toggleRegVisible] = useState(false)
-  const [showDashboard, setShowDashboard] = useState(false)
+  const [registerVisible, toggleRegisterVisible] = useState(false)
+  const [showDashboard, toggleShowDashboard] = useState(false)
 
   // these 3 functions below are needed to abstract the function calls for when we pass them as props to the child components.
-  function swapLoginVisible() {
-    toggleLoginVisible(!loginVisible)
-  }
+  const swapLoginVisible = () => { toggleLoginVisible(!loginVisible) }
 
-  function swapRegVisible() {
-    toggleRegVisible(!registerVisible)
-  }
+  const swapRegVisible = () => { toggleRegisterVisible(!registerVisible) }
 
-  function toggleDashboard() {
-    setShowDashboard(!showDashboard)
-  }
+  const toggleDashboard = () => { toggleShowDashboard(!showDashboard) }
 
   // this is where the XML is actually written that will later be converted to JS and HTML when its rendered through Vite (I think that's mostly right)
   return (
