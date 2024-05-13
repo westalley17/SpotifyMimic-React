@@ -20,19 +20,33 @@ export default function Dashboard(props) {
                 // use Axios here to call delete to the sessions endpoint, removing our generated session in the event that we manually logout
                 // (auto logout will happen every 24 hours)
                 const response = await axios.delete('http://localhost:3000/api/sessions', { data: { SessionID } })
-                sessionStorage.removeItem('SessionID') // remove from client-side after removing from backend, (MAKE THIS A TRY CATCH BLOCK LATER, IM TIRED)
-                setSwalProps({
-                    show: true,
-                    icon: 'success',
-                    title: 'Successfully logged out!',
-                    onConfirm: () => {
-                        // Reset swalProps
-                        setSwalProps({})
-                    }
-                })
-                // flips the dashboard and login to make sure we go back to the Login screen after logging out.
-                props.toggle()
-                props.loginToggle()
+                if (response.status == 200) {
+                    sessionStorage.removeItem('SessionID') // remove from client-side after removing from backend, (MAKE THIS A TRY CATCH BLOCK LATER, IM TIRED)
+                    setSwalProps({
+                        show: true,
+                        icon: 'success',
+                        title: 'Successfully logged out!',
+                        onConfirm: () => {
+                            // Reset swalProps
+                            setSwalProps({})
+                        }
+                    })
+                    // flips the dashboard and login to make sure we go back to the Login screen after logging out.
+                    props.toggle()
+                    props.loginToggle()
+                }
+                else {
+                    setSwalProps({
+                        show: true,
+                        icon: 'error',
+                        title: 'Error logging out!',
+                        text: response.response.data.error,
+                        onConfirm: () => {
+                            // Reset swalProps
+                            setSwalProps({})
+                        }
+                    })
+                }
             }
         } catch (error) {
             // basic error catch-all, will handle certain responses differently later on
